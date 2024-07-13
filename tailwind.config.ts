@@ -1,13 +1,16 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
+const {
+  default: flattenColorPalette,
+} = require("tailwindcss/lib/util/flattenColorPalette");
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -52,29 +55,72 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "menu-hover": "hsl(var(--menu-hover))",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      borderColor: {
+        DEFAULT: "hsl(var(--border))",
+      },
       keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
+        "scroll-keyframe": {
+          to: {
+            transform: "translate(calc(-50% - 0.5rem))"
+          }
         },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
+
+        "scroll-y-keyframe": {
+          to: {
+            transform: "translateY(calc(-50% - 0.5rem))"
+          }
         },
+
+        "accordion-down-keyframe": {
+          from: {
+            height: "0"
+          },
+
+          to: {
+            height: "var(--radix-accordion-content-height)"
+          }
+        },
+
+        "accordion-up-keyframe": {
+          from: {
+            height: "var(--radix-accordion-content-height)"
+          },
+
+          to: {
+            height: "0"
+          }
+        }
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        "scroll": "scroll-keyframe var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
+        "scrollY": "scroll-y-keyframe var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
+        "accordion-down": "accordion-down-keyframe 0.2s ease-out",
+        "accordion-up": "accordion-up-keyframe 0.2s ease-out"
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
-} satisfies Config
+  plugins: [
+    require("tailwindcss-animate"),
+    addVariablesForColors,
+  ],
+} satisfies Config;
 
-export default config
+export default config;
+
+function addVariablesForColors({ addBase, theme }: any) {
+  let allColors = flattenColorPalette(theme("colors"));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+
+  addBase({
+    ":root": newVars,
+  });
+}
